@@ -3,6 +3,8 @@ import { User } from "../../users/entities/user.entity";
 import { Card } from "../../card/entities/card.entity";
 import { Transaction } from "../../transaction/entities/transaction.entity";
 import { Transfer } from "../../transfer/entities/transfer.entity";
+import { FixedDeposit } from "../../fixed-deposit/entities/fixed-deposit.entity";
+
 
 export enum AccountType {
     SAVINGS = "SAVINGS",
@@ -51,12 +53,15 @@ export class Account {
     @OneToMany(() => Transaction, (transaction) => transaction.account)
     transactions: Transaction[];
 
+    @OneToMany(() => Transfer, (transfer) => transfer.fromAccount)
+    sentTransfers: Transfer[];
+    
+    @OneToMany(() => Transfer, (transfer) => transfer.toAccount)
+    receivedTransfers: Transfer[];
+
     @OneToMany(() => Card, (card) => card.account)
     cards: Card[];
 
-    @OneToMany(() => Transfer, (transfer) => transfer.fromAccount)
-    sentTransfers: Transfer[]
-
-    @OneToMany(() => Transfer, (transfer) => transfer.toAccount)
-    receivedTransfers: Transfer[]
+    @OneToMany(()=>FixedDeposit,(fixedDeposit)=>fixedDeposit.account)
+    fixedDeposits:FixedDeposit[]; 
 }
