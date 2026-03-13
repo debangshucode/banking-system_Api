@@ -32,7 +32,7 @@ export class Transaction {
         type:'enum',
         enum:TransactionStatus,
     })
-    Status:TransactionStatus
+    status:TransactionStatus
 
     @CreateDateColumn()
     createdAt:Date;
