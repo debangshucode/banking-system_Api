@@ -1,6 +1,6 @@
 import { Entity,PrimaryGeneratedColumn,Column,ManyToOne,CreateDateColumn } from "typeorm";
 import { Account } from "../../account/entities/account.entity";
-import { Transfer } from "src/transfer/entities/transfer.entity";
+import { Transfer } from "../../transfer/entities/transfer.entity";
 
 
 export enum TransactionType {
