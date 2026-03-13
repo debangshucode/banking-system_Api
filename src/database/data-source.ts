@@ -9,6 +9,6 @@ const dbName = process.env.DB_NAME;
 export const AppDataSource = new DataSource({
     type: 'sqlite',
     database: process.env.DB_NAME || 'bank.sqlite',
-    entities: [__dirname + '/**/*.entity.ts'],
-    migrations: [__dirname + '/db/migrations/*{.ts,.js}'],
+    entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+    migrations: [__dirname + '/../db/migrations/*{.ts,.js}'],
 });
