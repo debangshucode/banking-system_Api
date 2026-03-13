@@ -8,24 +8,18 @@ import { TransferModule } from './transfer/transfer.module';
 import { CardModule } from './card/card.module';
 import { FixedDepositModule } from './fixed-deposit/fixed-deposit.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [TypeOrmModule.forRootAsync({
+  imports: [ConfigModule.forRoot({
+    isGlobal:true,
+  })
+    ,TypeOrmModule.forRootAsync({
     useFactory: () => ({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      autoLoadEntities: true,
-      synchronize: false,
-      migrationsRun:true,
-      ssl:{
-        rejectUnauthorized:false,
-      }
+     type:'sqlite',
+     database:process.env.DB_NAME,
+     autoLoadEntities: true,
+     synchronize: false,
     })
   }), UsersModule, AccountModule, TransactionModule, TransferModule, CardModule, FixedDepositModule],
   controllers: [AppController],
