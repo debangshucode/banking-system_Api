@@ -26,14 +26,14 @@ export class FixedDeposit {
     @Column()
     tenure: number;
 
-    @Column()
-    maturityDate: Date;
-
     @Column({
         type: 'enum',
         enum: FdStatus
     })
     status: FdStatus;
+    
+    @Column()
+    maturityDate: Date;
 
     @CreateDateColumn()
     createdAt: Date;
