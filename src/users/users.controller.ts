@@ -8,10 +8,18 @@ import { UserDto } from './dto/user.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   
+  // * create user/signup
   @Post()
   @Serialize(UserDto)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
+  }
+
+  // * signin
+  @Post('/signin')
+  @Serialize(UserDto)
+  signIn(@Body() createUserDto:CreateUserDto) {
+    return this.usersService.signIn(createUserDto.email,createUserDto.password)
   }
 
   @Get()
