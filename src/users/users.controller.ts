@@ -47,7 +47,7 @@ export class UsersController {
     session.userId = null;
   }
 
-  // todo --find All users
+  // * --find All users
   @Get('/all-users')
   async findAll(@Paginate() query: PaginateQuery) {
     const result = await this.usersService.findAll(query);
@@ -67,7 +67,7 @@ export class UsersController {
     return this.usersService.findOne(+id);
   }
 
-  // todo  -- Update User
+  // *  -- Update User
   @Patch(':id')
   @Serialize(UserDto)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -75,7 +75,7 @@ export class UsersController {
   }
 
 
-  // todo -- Remove Users
+  // * -- Remove Users
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);

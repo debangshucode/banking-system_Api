@@ -58,7 +58,7 @@ export class UsersService {
 
     return user;
   }
-  // todo --find all users 
+  // * --find all users 
   findAll(query:PaginateQuery) {
     return paginate(query,this.repo,{
       sortableColumns:['id'],
@@ -83,8 +83,10 @@ export class UsersService {
     return this.repo.save(user)
   }
 
-  // todo -- remove users 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  // * -- remove users 
+  async remove(id: number) {
+    const user = await this.repo.findOne({where:{id}});
+    if(!user) throw new NotFoundException('User Not Found');
+    return this.repo.remove(user)
   }
 }
