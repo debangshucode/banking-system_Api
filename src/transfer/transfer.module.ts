@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TransferService } from './transfer.service';
 import { TransferController } from './transfer.controller';
-
+import { Transfer } from './entities/transfer.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
 @Module({
+  imports:[TypeOrmModule.forFeature([Transfer])],
   controllers: [TransferController],
   providers: [TransferService],
 })
