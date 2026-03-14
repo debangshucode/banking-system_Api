@@ -2,7 +2,7 @@ import { PrimaryGeneratedColumn,Entity,Column,CreateDateColumn, OneToMany } from
 import {Account} from "../../account/entities/account.entity"
 
 
-@Entity()
+@Entity('users')
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
