@@ -2,12 +2,14 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-
+import { Serialize } from '../interceptor/serialize.interceptor';
+import { UserDto } from './dto/user.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
+  
   @Post()
+  @Serialize(UserDto)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -18,6 +20,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @Serialize(UserDto)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,20 +15,21 @@ export class UsersService {
 
   constructor(@InjectRepository(User) private repo: Repository<User>){}
 
+  //*create user
   async create(createUserDto: CreateUserDto) {
-    const userMail = await this.repo.findOne({
+    const existingUser = await this.repo.findOne({
       where:{
         email:createUserDto.email
       }
     })
-    if(userMail) throw new BadRequestException('User with this mail is already registerd ! Try to Sign in')
+    if(existingUser) throw new BadRequestException('User with this mail is already registerd ! Try to Sign in')
 
       const salt = randomBytes(8).toString('hex');
       const hash = (await scrypt(createUserDto.password,salt,32)) as Buffer
 
       const result = salt+'.'+hash.toString('hex');
       
-      const user = await this.repo.create({
+      const user = this.repo.create({
         ...createUserDto,
         password:result,
       })
@@ -42,7 +43,10 @@ export class UsersService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    const user = this.repo.findOne({where:{id}})
+    if(!user) throw new NotFoundException('user not found');
+
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
