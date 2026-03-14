@@ -10,6 +10,7 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { Paginate } from 'nestjs-paginate';
 import type { PaginateQuery } from 'nestjs-paginate';
 import { plainToInstance } from 'class-transformer';
+import { ChangePasswordDto } from './dto/change-password.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
@@ -34,8 +35,8 @@ export class UsersController {
   // * signin
   @Post('/signin')
   @Serialize(UserDto)
-  async signIn(@Body() createUserDto: CreateUserDto, @Session() session: any) {
-    const user = await this.usersService.signIn(createUserDto.email, createUserDto.password)
+  async signIn(@Body() createUserDto: Partial<CreateUserDto>, @Session() session: any) {
+    const user = await this.usersService.signIn(createUserDto.email!, createUserDto.password!)
     session.userId = user.id;
     return user;
   }
@@ -54,8 +55,8 @@ export class UsersController {
 
     return {
       ...result,
-      data:plainToInstance(UserDto,result.data,{
-        excludeExtraneousValues:true
+      data: plainToInstance(UserDto, result.data, {
+        excludeExtraneousValues: true
       })
     }
   }
@@ -66,6 +67,15 @@ export class UsersController {
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
+
+  // * -- Update/Change Password
+  @Patch('/change-password')
+  @Serialize(UserDto)
+  changePass(@CurrentUser() user: User, @Body() dto: ChangePasswordDto) {
+    console.log('hit')
+    return this.usersService.changePass(user, dto.currentPassword, dto.newPassword);
+  }
+
 
   // *  -- Update User
   @Patch(':id')
