@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -12,6 +12,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
 import cookieSession from 'cookie-session';
 import { CurrentUserMiddleware } from './users/middleware/current-user.middleware';
+import { APP_PIPE } from '@nestjs/core';
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
@@ -30,19 +31,25 @@ import { CurrentUserMiddleware } from './users/middleware/current-user.middlewar
     }),
     UsersModule, AccountModule, TransactionModule, TransferModule, CardModule, FixedDepositModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+    provide: APP_PIPE,
+    useValue: new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true //theow error if unexpected value is given in req
+    })
+  }],
 })
 export class AppModule implements NestModule {
 
-  constructor(private configService:ConfigService){}
-  configure(consumer: MiddlewareConsumer){
+  constructor(private configService: ConfigService) { }
+  configure(consumer: MiddlewareConsumer) {
     consumer.apply(
       cookieSession({
-        keys:[this.configService.get('COOKIE_KEY')!]
+        keys: [this.configService.get('COOKIE_KEY')!]
       }),
       CurrentUserMiddleware
     ).forRoutes('*')
   }
-  
+
 
 }

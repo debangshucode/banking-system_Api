@@ -7,8 +7,6 @@ import { UserDto } from './dto/user.dto';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
-import { Http2ServerResponse } from 'http2';
-import { response } from 'express';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -22,7 +20,7 @@ export class UsersController {
   }
   
   // * create user/signup
-  @Post()
+  @Post('/signup')
   @Serialize(UserDto)
   async create(@Body() createUserDto: CreateUserDto, @Session() session:any) {
     const user = await this.usersService.create(createUserDto);
@@ -46,7 +44,7 @@ export class UsersController {
     session.userId = null;
   }
 
-  // todo
+  // todo --find All users
   @Get()
   findAll() {
     return this.usersService.findAll();
@@ -59,14 +57,15 @@ export class UsersController {
     return this.usersService.findOne(+id);
   }
 
-  // todo 
+  // todo  -- Update User
   @Patch(':id')
+  @Serialize(UserDto)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
 
-  // todo
+  // todo -- Remove Users
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);

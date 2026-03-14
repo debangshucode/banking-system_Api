@@ -15,7 +15,7 @@ export class UsersService {
 
   constructor(@InjectRepository(User) private repo: Repository<User>) { }
 
-  //*create user
+  //* --create user
   async create(createUserDto: CreateUserDto) {
     const existingUser = await this.repo.findOne({
       where: {
@@ -38,8 +38,7 @@ export class UsersService {
 
   }
 
-  // * SignIn
-
+  // * --SignIn
   async signIn(email: string, password: string) {
     const user = await this.repo.findOne({
       where: {
@@ -58,12 +57,12 @@ export class UsersService {
 
     return user;
   }
-  // todo
+  // todo --find all users 
   findAll() {
     return `This action returns all users`;
   }
 
-  // * Get user by its id
+  // * --Get user by its id
   findOne(id: number) {
     const user = this.repo.findOne({ where: { id } })
     if (!user) throw new NotFoundException('user not found');
@@ -71,12 +70,16 @@ export class UsersService {
     return user;
   }
 
-  // todo
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  // todo --update users
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.repo.findOne({where:{id}})
+    if(!user) throw new NotFoundException("User not found")
+    
+    Object.assign(user,updateUserDto)
+    return this.repo.save(user)
   }
 
-  // todo
+  // todo -- remove users 
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
