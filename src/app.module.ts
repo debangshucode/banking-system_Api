@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -9,7 +9,9 @@ import { CardModule } from './card/card.module';
 import { FixedDepositModule } from './fixed-deposit/fixed-deposit.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-
+import { ConfigService } from '@nestjs/config';
+import cookieSession from 'cookie-session';
+import { CurrentUserMiddleware } from './users/middleware/current-user.middleware';
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
@@ -30,4 +32,17 @@ import { ConfigModule } from '@nestjs/config';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+
+  constructor(private configService:ConfigService){}
+  configure(consumer: MiddlewareConsumer){
+    consumer.apply(
+      cookieSession({
+        keys:[this.configService.get('COOKIE_KEY')!]
+      }),
+      CurrentUserMiddleware
+    ).forRoutes('*')
+  }
+  
+
+}
