@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
+import { paginate, PaginateQuery } from 'nestjs-paginate';
 
 
 const scrypt = promisify(_scrypt)
@@ -58,8 +59,11 @@ export class UsersService {
     return user;
   }
   // todo --find all users 
-  findAll() {
-    return `This action returns all users`;
+  findAll(query:PaginateQuery) {
+    return paginate(query,this.repo,{
+      sortableColumns:['id'],
+      defaultLimit:10,
+    })
   }
 
   // * --Get user by its id
@@ -70,7 +74,7 @@ export class UsersService {
     return user;
   }
 
-  // todo --update users
+  // * --update users
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.repo.findOne({where:{id}})
     if(!user) throw new NotFoundException("User not found")

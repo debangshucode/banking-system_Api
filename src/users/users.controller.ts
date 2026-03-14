@@ -7,22 +7,25 @@ import { UserDto } from './dto/user.dto';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { Paginate } from 'nestjs-paginate';
+import type { PaginateQuery } from 'nestjs-paginate';
+import { plainToInstance } from 'class-transformer';
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   // *currentUser
   @Get('/curUser')
   @Serialize(UserDto)
   @UseGuards(AuthGuard)
-  async getCurUSer(@CurrentUser() user:User){
+  async getCurUSer(@CurrentUser() user: User) {
     return user
   }
-  
+
   // * create user/signup
   @Post('/signup')
   @Serialize(UserDto)
-  async create(@Body() createUserDto: CreateUserDto, @Session() session:any) {
+  async create(@Body() createUserDto: CreateUserDto, @Session() session: any) {
     const user = await this.usersService.create(createUserDto);
     session.userId = user.id;
     return user;
@@ -31,8 +34,8 @@ export class UsersController {
   // * signin
   @Post('/signin')
   @Serialize(UserDto)
-  async signIn(@Body() createUserDto:CreateUserDto, @Session() session:any) {
-    const user = await this.usersService.signIn(createUserDto.email,createUserDto.password)
+  async signIn(@Body() createUserDto: CreateUserDto, @Session() session: any) {
+    const user = await this.usersService.signIn(createUserDto.email, createUserDto.password)
     session.userId = user.id;
     return user;
   }
@@ -40,14 +43,21 @@ export class UsersController {
   // * signOut
   @Post('/signout')
   @HttpCode(200)
-  async signout(@Session() session:any){
+  async signout(@Session() session: any) {
     session.userId = null;
   }
 
   // todo --find All users
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Get('/all-users')
+  async findAll(@Paginate() query: PaginateQuery) {
+    const result = await this.usersService.findAll(query);
+
+    return {
+      ...result,
+      data:plainToInstance(UserDto,result.data,{
+        excludeExtraneousValues:true
+      })
+    }
   }
 
   // * get user by id
