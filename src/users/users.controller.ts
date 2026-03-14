@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Session, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Session, HttpCode, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -6,6 +6,9 @@ import { Serialize } from '../interceptor/serialize.interceptor';
 import { UserDto } from './dto/user.dto';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from './entities/user.entity';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { Http2ServerResponse } from 'http2';
+import { response } from 'express';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -13,6 +16,7 @@ export class UsersController {
   // *currentUser
   @Get('/curUser')
   @Serialize(UserDto)
+  @UseGuards(AuthGuard)
   async getCurUSer(@CurrentUser() user:User){
     return user
   }
@@ -42,22 +46,27 @@ export class UsersController {
     session.userId = null;
   }
 
+  // todo
   @Get()
   findAll() {
     return this.usersService.findAll();
   }
 
+  // * get user by id
   @Get(':id')
   @Serialize(UserDto)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
+  // todo 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
+
+  // todo
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
