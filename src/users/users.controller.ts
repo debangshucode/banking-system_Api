@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Session, HttpCode, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Session, HttpCode, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -70,9 +70,9 @@ export class UsersController {
 
   // * -- Update/Change Password
   @Patch('/change-password')
+  @UseGuards(AuthGuard)
   @Serialize(UserDto)
   changePass(@CurrentUser() user: User, @Body() dto: ChangePasswordDto) {
-    console.log('hit')
     return this.usersService.changePass(user, dto.currentPassword, dto.newPassword);
   }
 
@@ -89,6 +89,6 @@ export class UsersController {
   @Delete(':id')
   @HttpCode(204)
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.usersService.deactivate(+id);
   }
 }

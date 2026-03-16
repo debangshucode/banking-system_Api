@@ -7,7 +7,6 @@ import { Repository } from 'typeorm';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
-import { ChangePasswordDto } from './dto/change-password.dto';
 
 
 const scrypt = promisify(_scrypt)
@@ -96,6 +95,7 @@ export class UsersService {
 
   // * --changePass
   async changePass(user: User, currentPassword: string, newPassword: string) {
+    if(user.status === UserStatus.INACTIVE) throw new BadRequestException('User Is Deactivated')
     await verifyPassword(currentPassword,user.password);
     user.password = await hashPassword(newPassword)
 
@@ -103,7 +103,7 @@ export class UsersService {
   }
 
   // * -- remove users 
-  async remove(id: number) {
+  async deactivate(id: number) {
     const user = await this.repo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User Not Found');
     user.status = UserStatus.INACTIVE;

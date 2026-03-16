@@ -1,4 +1,5 @@
 import { Expose } from "class-transformer";
+import { UserStatus } from "../entities/user.entity";
 
 
 export class UserDto {
@@ -17,6 +18,9 @@ export class UserDto {
 
     @Expose()
     address: string;
+
+    @Expose()
+    status:UserStatus;
 
     @Expose()
     createdAt: Date;
