@@ -11,6 +11,11 @@ import { Paginate } from 'nestjs-paginate';
 import type { PaginateQuery } from 'nestjs-paginate';
 import { plainToInstance } from 'class-transformer';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { SignInDto } from './dto/signin.dto';
+
+
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
@@ -35,7 +40,7 @@ export class UsersController {
   // * signin
   @Post('/signin')
   @Serialize(UserDto)
-  async signIn(@Body() createUserDto: Partial<CreateUserDto>, @Session() session: any) {
+  async signIn(@Body() createUserDto: SignInDto, @Session() session: any) {
     const user = await this.usersService.signIn(createUserDto.email!, createUserDto.password!)
     session.userId = user.id;
     return user;

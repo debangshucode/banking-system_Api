@@ -8,7 +8,10 @@ import { AccountDto } from './dto/account.dto';
 import { Paginate } from 'nestjs-paginate';
 import type {PaginateQuery} from 'nestjs-paginate'
 import { plainToInstance } from 'class-transformer';
+import { ApiTags } from '@nestjs/swagger';
 
+
+@ApiTags('Accounts')
 @Controller('account')
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
