@@ -17,7 +17,7 @@ export enum AccountStatus {
     CLOSED = "CLOSED",
     PAUSED = "PAUSED"
 }
-@Entity()
+@Entity('accounts')
 export class Account {
 
     @PrimaryGeneratedColumn()
