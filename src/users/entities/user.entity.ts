@@ -1,31 +1,47 @@
-import { PrimaryGeneratedColumn,Entity,Column,CreateDateColumn, OneToMany } from "typeorm";
-import {Account} from "../../account/entities/account.entity"
+import { PrimaryGeneratedColumn, Entity, Column, CreateDateColumn, OneToMany, UpdateDateColumn } from "typeorm";
+import { Account } from "../../account/entities/account.entity"
 
+export enum UserStatus {
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE'
+}
 
 @Entity('users')
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({unique:true})
-    email:string;
+    @Column({ unique: true })
+    email: string;
 
     @Column()
-    password:string;
+    password: string;
 
     @Column()
-    name:string;
+    name: string;
 
     @Column()
-    number:string;
+    number: string;
 
     @Column()
-    address:string;
+    address: string;
+
+    @Column({
+        type: 'enum',
+        enum: UserStatus,
+        default: UserStatus.ACTIVE
+    })
+    status: UserStatus;
 
     @CreateDateColumn()
-    createdAt:Date;
-    
-    @OneToMany(()=>Account,(account)=>account.user)
+    createdAt: Date;
+
+    // @UpdateDateColumn()
+    // updatedAt: Date;
+
+
+
+    @OneToMany(() => Account, (account) => account.user)
     accounts: Account[];
-    
+
 }
