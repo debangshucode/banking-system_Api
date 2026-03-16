@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
+import { User, UserStatus } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
@@ -63,6 +63,7 @@ export class UsersService {
     })
 
     if (!user) throw new NotFoundException('user not found ')
+    if(user.status === UserStatus.INACTIVE) throw new BadRequestException('User is Deactivated')
 
     await verifyPassword(password,user.password)
 
@@ -105,6 +106,7 @@ export class UsersService {
   async remove(id: number) {
     const user = await this.repo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User Not Found');
-    return this.repo.remove(user)
+    user.status = UserStatus.INACTIVE;
+    return this.repo.save(user)
   }
 }
