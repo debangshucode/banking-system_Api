@@ -20,14 +20,22 @@ import { APP_PIPE } from '@nestjs/core';
     , TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'postgres',
-        url: process.env.DATABASE_URL || undefined,
-        host: process.env.DB_HOST,
-        port: Number(process.env.DB_PORT),
+
+        url: process.env.DATABASE_URL,
+
+        host: process.env.DATABASE_URL ? undefined : process.env.DB_HOST,
+        port: process.env.DATABASE_URL ? undefined : Number(process.env.DB_PORT),
+
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
+
         autoLoadEntities: true,
         synchronize: false,
+
+        ssl: process.env.DATABASE_URL
+          ? { rejectUnauthorized: false }
+          : false,
       }),
     }),
     UsersModule, AccountModule, TransactionModule, TransferModule, CardModule, FixedDepositModule],
