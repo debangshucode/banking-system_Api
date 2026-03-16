@@ -28,7 +28,8 @@ export class FixedDeposit {
 
     @Column({
         type: 'enum',
-        enum: FdStatus
+        enum: FdStatus,
+        default:FdStatus.ACTIVE
     })
     status: FdStatus;
     

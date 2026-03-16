@@ -32,6 +32,7 @@ export class Card {
     @Column({
         type: 'enum',
         enum: CardStatus,
+        default:CardStatus.ACTIVE
     })
     status: CardStatus;
 

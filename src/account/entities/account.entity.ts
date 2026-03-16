@@ -32,12 +32,18 @@ export class Account {
     })
     accountType: AccountType;
 
-    @Column()
+    @Column({
+        type:'decimal',
+        precision:12,
+        scale:2,
+        default:0
+    })
     balance: number;
 
     @Column({
         type: "enum",
         enum: AccountStatus,
+        default:'ACTIVE'
     })
     status: AccountStatus;
 

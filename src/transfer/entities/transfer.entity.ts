@@ -20,6 +20,7 @@ export class Transfer {
     @Column({
         type:'enum',
         enum:TransferStatus,
+        default:TransferStatus.PENDING
     })
     status:TransferStatus
 
