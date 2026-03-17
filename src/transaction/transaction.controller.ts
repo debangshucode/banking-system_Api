@@ -26,8 +26,10 @@ export class TransactionController {
     return this.transactionService.findAll();
   }
 
-  // todo --Get one Transaction 
+  // * --Get one Transaction 
   @Get(':id')
+  @UseGuards(AuthGuard)
+  @Serialize(TransactionDto)
   findOne(@Param('id') id: string) {
     return this.transactionService.findOne(+id);
   }

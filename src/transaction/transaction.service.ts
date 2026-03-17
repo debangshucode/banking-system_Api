@@ -51,8 +51,10 @@ export class TransactionService {
   }
 
   // todo -- Get one  Transaction
-  findOne(id: number) {
-    return `This action returns a #${id} transaction`;
+  async findOne(id: number) {
+    const transaction = await this.TransactionRepo.findOne({where:{id},relations:{account:true}})
+    if(!transaction) throw new NotFoundException('InValid Request No matching transaction found')
+    return transaction; 
   }
 
   // todo -- Update Transaction
