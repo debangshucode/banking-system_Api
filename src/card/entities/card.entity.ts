@@ -14,7 +14,7 @@ export enum CardStatus {
 }
 
 
-@Entity()
+@Entity('cards')
 export class Card {
 
     @PrimaryGeneratedColumn()
