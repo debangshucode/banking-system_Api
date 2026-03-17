@@ -7,7 +7,7 @@ export enum TransferStatus {
     SUCCESS='SUCCESS',
     FAILED='FAILED'
 }
-@Entity()
+@Entity('transfers')
 
 export class Transfer {
 
