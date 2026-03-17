@@ -6,6 +6,7 @@ import { Account, AccountStatus } from 'src/account/entities/account.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction, TransactionStatus, TransactionType } from './entities/transaction.entity';
+import { paginate, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class TransactionService {
@@ -46,8 +47,12 @@ export class TransactionService {
   }
 
   // todo -- Get all Transaction
-  findAll() {
-    return `This action returns all transaction`;
+  findAll(query:PaginateQuery) {
+    return paginate(query,this.TransactionRepo,{
+      relations:['account'],
+      sortableColumns:['id'],
+      defaultSortBy:[['id','DESC']]
+    })
   }
 
   // todo -- Get one  Transaction
@@ -57,13 +62,13 @@ export class TransactionService {
     return transaction; 
   }
 
-  // todo -- Update Transaction
-  update(id: number, updateTransactionDto: UpdateTransactionDto) {
-    return `This action updates a #${id} transaction`;
-  }
+  // ! -- Update Transaction
+  // update(id: number, updateTransactionDto: UpdateTransactionDto) {
+  //   return `This action updates a #${id} transaction`;
+  // }
 
-  // todo -- Deactivate Transaction
-  remove(id: number) {
-    return `This action removes a #${id} transaction`;
-  }
+  // ! -- Deactivate Transaction 
+  // remove(id: number) {
+  //   return `This action removes a #${id} transaction`;
+  // }
 }

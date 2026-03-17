@@ -7,6 +7,9 @@ import { CurrentUser } from 'src/users/decorators/current-user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { Serialize } from 'src/interceptor/serialize.interceptor';
 import { TransactionDto } from './dto/transaction.dto';
+import { Paginate } from 'nestjs-paginate';
+import type { PaginateQuery } from 'nestjs-paginate'
+import { plainToInstance } from 'class-transformer';
 
 @Controller('transaction')
 export class TransactionController {
@@ -20,10 +23,17 @@ export class TransactionController {
     return this.transactionService.create(user,createTransactionDto);
   }
 
-  // todo --Get All Transaction paginated
+  // * --Get All Transaction paginated
   @Get()
-  findAll() {
-    return this.transactionService.findAll();
+  @UseGuards(AuthGuard)
+  async findAll(@Paginate() query:PaginateQuery) {
+    const result =  await this.transactionService.findAll(query);
+    return {
+      ...result,
+      data:plainToInstance(TransactionDto,result.data,{
+        excludeExtraneousValues:true,
+      })
+    }
   }
 
   // * --Get one Transaction 
@@ -34,15 +44,15 @@ export class TransactionController {
     return this.transactionService.findOne(+id);
   }
 
-  // todo --Update One Transaction 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto) {
-    return this.transactionService.update(+id, updateTransactionDto);
-  }
+  // ! --Update One Transaction (should not able to update transaction)
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto) {
+  //   return this.transactionService.update(+id, updateTransactionDto);
+  // }
 
-  // todo --Delete One Transaction 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.transactionService.remove(+id);
-  }
+  // ! --Delete One Transaction (no delete transaction)
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.transactionService.remove(+id);
+  // }
 }
