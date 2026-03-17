@@ -7,7 +7,7 @@ export enum FdStatus {
     MATURED = 'MATURED',
     CLOSED = 'CLOSED'
 }
-@Entity()
+@Entity('fixed_deposites')
 export class FixedDeposit {
 
     @PrimaryGeneratedColumn()

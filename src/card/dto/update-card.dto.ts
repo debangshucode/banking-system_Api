@@ -16,7 +16,7 @@ export class UpdateCardDto  {
     })
     @IsString()
     @IsOptional()
-    @Length(4)
+    @Length(4,4)
     newPin: string;
 
     @ApiProperty({

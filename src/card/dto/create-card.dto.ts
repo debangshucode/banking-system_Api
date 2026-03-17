@@ -21,6 +21,6 @@ export class CreateCardDto {
     })
     @IsString()
     @IsOptional()
-    @Length(4)
+    @Length(4,4)
     pin:string;
 }
