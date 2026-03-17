@@ -13,7 +13,7 @@ export enum TransactionStatus {
     SUCCESS='SUCCESS',
     FAILED='FAILED'
 }
-@Entity()
+@Entity('transactions')
 export class Transaction {
     
     @PrimaryGeneratedColumn()
