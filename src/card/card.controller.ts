@@ -9,6 +9,7 @@ import { Serialize } from 'src/interceptor/serialize.interceptor';
 import { CardDto } from './dto/card.dto';
 import { Paginate, type PaginateQuery } from 'nestjs-paginate';
 import { plainToInstance } from 'class-transformer';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 @Controller('cards')
 export class CardController {
@@ -22,7 +23,7 @@ export class CardController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, AdminGuard)
   async findAll(@Paginate() query:PaginateQuery) {
     const result = await this.cardService.findAll(query);
     return {
@@ -34,19 +35,21 @@ export class CardController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, AdminGuard)
   @Serialize(CardDto)
   findOne(@Param('id') id: string) {
     return this.cardService.findOne(+id);
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard, AdminGuard)
   @Serialize(CardDto)
   update(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto) {
     return this.cardService.update(+id, updateCardDto);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard, AdminGuard)
   @Serialize(CardDto)
   remove(@Param('id') id: string) {
     return this.cardService.remove(+id);

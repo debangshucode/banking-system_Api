@@ -9,6 +9,7 @@ import { Paginate } from 'nestjs-paginate';
 import type {PaginateQuery} from 'nestjs-paginate'
 import { plainToInstance } from 'class-transformer';
 import { ApiTags } from '@nestjs/swagger';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 
 @ApiTags('Accounts')
@@ -26,6 +27,7 @@ export class AccountController {
 
   //* --get all account
   @Get()
+  @UseGuards(AuthGuard, AdminGuard)
   async findAll(@Paginate() query:PaginateQuery) {
     const accounts= await this.accountService.findAll(query);
     return {
@@ -38,6 +40,7 @@ export class AccountController {
 
   //* --get one account
   @Get(':id')
+  @UseGuards(AuthGuard, AdminGuard)
   @Serialize(AccountDto)
   findOne(@Param('id') id: string) {
     return this.accountService.findOne(+id);
@@ -45,6 +48,7 @@ export class AccountController {
 
   //* --update account
   @Patch(':id')
+  @UseGuards(AuthGuard, AdminGuard)
   @Serialize(AccountDto)
   update(@Param('id') id: string, @Body() updateAccountDto: UpdateAccountDto) {
     return this.accountService.update(+id, updateAccountDto);
@@ -52,6 +56,7 @@ export class AccountController {
 
   //* --deactivate account
   @Delete(':id')
+  @UseGuards(AuthGuard, AdminGuard)
   @Serialize(AccountDto)
   remove(@Param('id') id: string) {
     return this.accountService.close(+id);

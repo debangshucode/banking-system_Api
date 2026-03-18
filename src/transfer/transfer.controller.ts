@@ -10,6 +10,7 @@ import { TransferDto } from './dto/transfer.dto';
 import { Paginate } from 'nestjs-paginate';
 import type { PaginateQuery } from 'nestjs-paginate'
 import { plainToInstance } from 'class-transformer';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 @Controller('transfers')
 export class TransferController {
@@ -23,7 +24,7 @@ export class TransferController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, AdminGuard)
   async findAll(@Paginate() query:PaginateQuery) {
     const result = await this.transferService.findAll(query);
 
@@ -36,7 +37,7 @@ export class TransferController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, AdminGuard)
   @Serialize(TransferDto)
   findOne(@Param('id') id: string) {
     return this.transferService.findOne(+id);

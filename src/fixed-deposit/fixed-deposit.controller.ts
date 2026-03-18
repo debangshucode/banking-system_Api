@@ -10,6 +10,7 @@ import { Paginate } from 'nestjs-paginate';
 import type {PaginateQuery } from 'nestjs-paginate'
 import { plainToInstance } from 'class-transformer';
 import { FixedDepositDto } from './dto/fixed-deposit.dto';
+import { AdminGuard } from 'src/guards/admin.guard';
 @Controller('fixed-deposit')
 export class FixedDepositController {
   constructor(private readonly fixedDepositService: FixedDepositService) {}
@@ -22,7 +23,7 @@ export class FixedDepositController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, AdminGuard)
   async findAll(@Paginate() query:PaginateQuery) {
     const result = await this.fixedDepositService.findAll(query);
     return{
@@ -34,7 +35,7 @@ export class FixedDepositController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, AdminGuard)
   @Serialize(FixedDepositDto)
   findOne(@Param('id') id: string) {
     return this.fixedDepositService.findOne(+id);
@@ -47,6 +48,7 @@ export class FixedDepositController {
   // }
 
   @Delete(':id')
+  @UseGuards(AuthGuard, AdminGuard)
   @Serialize(FixedDepositDto)
   remove(@Param('id') id: string) {
     return this.fixedDepositService.remove(+id);
