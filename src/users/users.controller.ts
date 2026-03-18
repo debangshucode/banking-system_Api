@@ -71,6 +71,7 @@ export class UsersController {
   // * get user by id
   @Get(':id')
   @Serialize(UserDto)
+  @UseGuards(AuthGuard)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
@@ -86,9 +87,10 @@ export class UsersController {
 
   // *  -- Update User
   @Patch(':id')
+  @UseGuards(AuthGuard)
   @Serialize(UserDto)
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  update(@CurrentUser() user:User,@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(user,+id, updateUserDto);
   }
 
 
