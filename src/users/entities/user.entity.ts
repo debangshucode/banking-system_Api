@@ -6,6 +6,11 @@ export enum UserStatus {
     INACTIVE = 'INACTIVE'
 }
 
+export enum UserRole {
+    ADMIN = 'ADMIN',
+    USER = 'USER'
+}
+
 @Entity('users')
 export class User {
     @PrimaryGeneratedColumn()
@@ -25,6 +30,13 @@ export class User {
 
     @Column()
     address: string;
+
+    @Column({
+        type:'enum',
+        enum:UserRole,
+        default:UserRole.USER,
+    })
+    role:UserRole
 
     @Column({
         type: 'enum',

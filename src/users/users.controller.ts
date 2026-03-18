@@ -13,6 +13,7 @@ import { plainToInstance } from 'class-transformer';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { SignInDto } from './dto/signin.dto';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 
 @ApiTags('Users')
@@ -55,6 +56,7 @@ export class UsersController {
 
   // * --find All users
   @Get('/all-users')
+  @UseGuards(AuthGuard,AdminGuard)
   async findAll(@Paginate() query: PaginateQuery) {
     const result = await this.usersService.findAll(query);
 
@@ -92,6 +94,7 @@ export class UsersController {
 
   // * -- Remove Users
   @Delete(':id')
+  @UseGuards(AuthGuard,AdminGuard)
   @HttpCode(204)
   remove(@Param('id') id: string) {
     return this.usersService.deactivate(+id);

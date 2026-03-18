@@ -37,7 +37,6 @@ export class TransferController {
 
   @Get(':id')
   @UseGuards(AuthGuard)
-  @UseGuards(AuthGuard)
   @Serialize(TransferDto)
   findOne(@Param('id') id: string) {
     return this.transferService.findOne(+id);

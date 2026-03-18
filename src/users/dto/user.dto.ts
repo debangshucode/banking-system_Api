@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose } from "class-transformer";
-import { UserStatus } from "../entities/user.entity";
+import { UserRole, UserStatus } from "../entities/user.entity";
 
 
 export class UserDto {
@@ -24,6 +24,10 @@ export class UserDto {
     @ApiProperty({ example: '42 MG Road, Indiranagar, Bengaluru, Karnataka 560038, India.' })
     @Expose()
     address: string;
+
+    @ApiProperty({ enum: UserRole, example: UserRole.USER })
+    @Expose()
+    role:UserRole;
 
     @ApiProperty({ enum: UserStatus, example: UserStatus.ACTIVE })
     @Expose()
