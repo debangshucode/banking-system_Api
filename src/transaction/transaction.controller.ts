@@ -39,7 +39,7 @@ export class TransactionController {
 
   // * --Get one Transaction 
   @Get(':id')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard)
   @Serialize(TransactionDto)
   findOne(@Param('id') id: string) {
     return this.transactionService.findOne(+id);

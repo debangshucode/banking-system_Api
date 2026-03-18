@@ -35,7 +35,7 @@ export class FixedDepositController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard)
   @Serialize(FixedDepositDto)
   findOne(@Param('id') id: string) {
     return this.fixedDepositService.findOne(+id);

@@ -35,7 +35,7 @@ export class CardController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard)
   @Serialize(CardDto)
   findOne(@Param('id') id: string) {
     return this.cardService.findOne(+id);

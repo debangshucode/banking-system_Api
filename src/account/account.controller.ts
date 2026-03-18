@@ -40,7 +40,7 @@ export class AccountController {
 
   //* --get one account
   @Get(':id')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard)
   @Serialize(AccountDto)
   findOne(@Param('id') id: string) {
     return this.accountService.findOne(+id);
