@@ -40,6 +40,11 @@ It intentionally does not include test planning.
 - `ACTIVE`
 - `INACTIVE`
 
+### User Role
+
+- `ADMIN`
+- `USER`
+
 ### Account
 
 - `ACTIVE`
@@ -88,6 +93,12 @@ It intentionally does not include test planning.
 - `AuthGuard` currently checks only whether `session.userId` exists.
 - It is a simple signed-in check.
 
+### Admin Guard
+
+- `AdminGuard` exists.
+- It checks whether `req.currentUser.role === ADMIN`.
+- It is currently being used on selected admin-only controller routes.
+
 ### Current User Decorator
 
 - `@CurrentUser()` reads `req.currentUser` in controllers.
@@ -110,7 +121,9 @@ The following modules now have a workable phase-1 base:
 ### User Entity
 
 - `User.status` exists.
+- `User.role` exists.
 - User status defaults to `ACTIVE`.
+- User role defaults to `USER`.
 - Users are related to accounts with `User -> Account` as `1:N`.
 
 ### Password Handling
@@ -135,6 +148,33 @@ The following modules now have a workable phase-1 base:
 - User module is considered good enough for phase 1.
 - No admin features yet.
 - Some user hardening and cleanup is intentionally postponed.
+
+## User Role / Admin Phase: Current State
+
+### Current Role Model
+
+- Role is stored directly on the `users` table.
+- Current role values are:
+  - `ADMIN`
+  - `USER`
+
+### Current Admin-Only Routes
+
+- `GET /users/all-users`
+- `DELETE /users/:id`
+
+### Current Shared User/Admin Rule
+
+- `PATCH /users/:id` is a shared authenticated route.
+- `ADMIN` can update any user.
+- Normal `USER` can update only their own user record.
+
+### Current User-Self Routes
+
+- `GET /users/curUser`
+- `PATCH /users/change-password`
+
+These currently remain signed-in user flows, not admin-only flows.
 
 ## Phase 2: Deferred User Work
 
@@ -184,7 +224,7 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 
 ### Account Creation Rules
 
-- Any signed-in user can currently create an account.
+- Account creation is a shared authenticated route.
 - For phase 1, `userId` is provided explicitly in the request body.
 - The client sends only:
   - `userId`
@@ -199,6 +239,8 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 
 - Reject if the target user does not exist.
 - Reject if the target user is `INACTIVE`.
+- `ADMIN` may create an account for any target user.
+- Normal `USER` may create an account only for themselves.
 
 ### Account Number Generation
 
@@ -232,6 +274,7 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 - Single-account read exists.
 - Account list exists.
 - List currently uses pagination.
+- Account list is currently admin-only at controller level.
 
 ### Account Update Rules
 
@@ -242,12 +285,16 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
   - `status`
   - `accountNumber`
   - `user/userId`
+- `PATCH /accounts/:id` is currently a shared authenticated route.
+- `ADMIN` can update any account.
+- Normal `USER` can update only their own account.
 
 ### Account Close Rules
 
 - Account close is status-based, not physical delete.
 - Closing an account means setting `status = CLOSED`.
 - Closing an already closed account should be rejected.
+- `DELETE /accounts/:id` is currently admin-only at controller level.
 
 ## Transaction Module
 
@@ -280,6 +327,7 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
   - `status`
   - account balance update
   - any transfer linkage
+- `ADMIN` does not bypass this ownership rule in the current design.
 
 ### Transaction Validation Rules
 
@@ -306,6 +354,8 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 - Single transaction read exists.
 - Transaction list exists with pagination.
 - Current DTO shape exposes a flat response including `accountId`.
+- Transaction list is currently admin-only at controller level.
+- Single transaction read is currently authenticated, but not yet ownership-filtered in service.
 
 ### Transaction Mutability Rule
 
@@ -337,6 +387,7 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
   - `fromAccountId`
   - `toAccountId`
   - `amount`
+- `ADMIN` does not bypass source-account ownership for transfer creation in the current design.
 
 ### Transfer Validation Rules
 
@@ -369,6 +420,8 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 - Response DTO is flat and exposes:
   - `fromAccountId`
   - `toAccountId`
+- Transfer list is currently admin-only at controller level.
+- Single transfer read is currently authenticated, but not yet ownership-filtered in service.
 
 ### Transfer Mutability Rule
 
@@ -389,7 +442,7 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 
 ### Card Creation Rules
 
-- Only the signed-in user can create a card on their own account.
+- Card creation is a shared authenticated route.
 - The client sends:
   - `accountId`
   - `cardType`
@@ -399,6 +452,8 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
   - `cvv`
   - `expiryDate`
   - `status = ACTIVE`
+- `ADMIN` may create a card for any account.
+- Normal `USER` may create a card only on their own account.
 
 ### Card Validation Rules
 
@@ -420,6 +475,8 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 
 - Single card read exists.
 - Card list exists with pagination.
+- Card list is currently admin-only at controller level.
+- Single card read is currently authenticated, but not yet ownership-filtered in service.
 
 ### Card Update Rules
 
@@ -430,12 +487,16 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
   - `newPin`
 - PIN change requires both current and new PIN.
 - New PIN is hashed before save.
+- `PATCH /cards/:id` is currently a shared authenticated route.
+- `ADMIN` can update any card.
+- Normal `USER` can update only a card bound to their own account.
 
 ### Card Remove Rule
 
 - Card remove is status-based, not physical delete.
 - Remove means setting `status = BLOCKED`.
 - Already blocked or expired cards should not be blocked again.
+- `DELETE /cards/:id` is currently admin-only at controller level.
 
 ## Phase 2: Deferred Card Work
 
@@ -450,7 +511,7 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 
 ### Fixed Deposit Creation Rules
 
-- Only the signed-in user can create a fixed deposit on their own account.
+- Fixed deposit creation is a shared authenticated route.
 - The client sends:
   - `accountId`
   - `principalAmount`
@@ -459,6 +520,8 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
   - `interestRate`
   - `status = ACTIVE`
   - `maturityDate`
+- `ADMIN` may create a fixed deposit for any account.
+- Normal `USER` may create a fixed deposit only on their own account.
 
 ### Fixed Deposit Validation Rules
 
@@ -485,6 +548,8 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 - Single fixed deposit read exists.
 - Fixed deposit list exists with pagination.
 - Response DTO stays flat and includes `accountId`.
+- Fixed deposit list is currently admin-only at controller level.
+- Single fixed deposit read is currently authenticated, but not yet ownership-filtered in service.
 
 ### Fixed Deposit Mutability Rule
 
@@ -495,6 +560,7 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 - Remove is status-based, not physical delete.
 - Remove means setting `status = CLOSED`.
 - Already closed fixed deposits should be rejected.
+- `DELETE /fixed-deposit/:id` is currently admin-only at controller level.
 
 ## Phase 2: Deferred Fixed Deposit Work
 
@@ -562,9 +628,12 @@ This same principle should apply one level above as well:
 
 The major phase-2 work that still remains:
 
-- Add stronger authorization rules across modules.
+- Continue strengthening authorization rules across modules.
 - Revisit account creation so arbitrary signed-in users cannot create accounts for other users.
 - Make read-access rules consistent across sensitive modules.
+- Decide final admin boundaries per route instead of temporary partial rollout.
+- Add service-level ownership checks for authenticated `GET :id` routes where needed.
+- Review which shared routes should remain admin+owner and which should stay strictly owner-only.
 - Decide whether routes should move from singular to plural naming.
 - Improve message consistency and cleanup typos across services.
 - Remove unused imports and other scaffold leftovers from commented-out routes.
