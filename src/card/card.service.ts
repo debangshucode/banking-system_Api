@@ -45,8 +45,8 @@ export class CardService {
 
   async create(user: User, createCardDto: CreateCardDto) {
     const account = await this.accountRepo.findOne({ where: { id: createCardDto.accountId }, relations: { user: true } })
-    if (!account) throw new NotFoundException('Account Does Not Exist');
-    if (account.user.id !== user.id) throw new BadRequestException('You are not Authorize To access this Account');
+    if (!account) throw new NotFoundException('Account does not exist');
+    if (account.user.id !== user.id) throw new BadRequestException('You are not authorized to access this account');
     if (account.status === AccountStatus.CLOSED || account.status === AccountStatus.PAUSED) throw new BadRequestException(`This account is ${account.status}`);
 
     const card = this.cardRepo.create();
@@ -77,7 +77,7 @@ export class CardService {
 
   async findOne(id: number) {
     const card = await this.cardRepo.findOne({ where: { id }, relations: { account: true } });
-    if (!card) throw new NotFoundException('Card Not Exist');
+    if (!card) throw new NotFoundException('Card does not exist');
     return card;
   }
 
@@ -87,8 +87,8 @@ export class CardService {
 
     card.status = updateCardDto?.status ?? card.status;
 
-    if (updateCardDto.currentPin && !updateCardDto.newPin) throw new BadRequestException('Current and New Both pin is requried')
-    if (updateCardDto.newPin && !updateCardDto.currentPin) throw new BadRequestException('Current and New Both pin is requried')
+    if (updateCardDto.currentPin && !updateCardDto.newPin) throw new BadRequestException('Both current PIN and new PIN are required ')
+    if (updateCardDto.newPin && !updateCardDto.currentPin) throw new BadRequestException('Both current PIN and new PIN are required ')
 
     if (updateCardDto.currentPin && updateCardDto.newPin) {
       await this.verifyPassword(updateCardDto.currentPin, card.pin);

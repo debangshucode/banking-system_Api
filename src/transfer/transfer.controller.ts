@@ -11,7 +11,7 @@ import { Paginate } from 'nestjs-paginate';
 import type { PaginateQuery } from 'nestjs-paginate'
 import { plainToInstance } from 'class-transformer';
 
-@Controller('transfer')
+@Controller('transfers')
 export class TransferController {
   constructor(private readonly transferService: TransferService) {}
 
@@ -23,6 +23,7 @@ export class TransferController {
   }
 
   @Get()
+  @UseGuards(AuthGuard)
   async findAll(@Paginate() query:PaginateQuery) {
     const result = await this.transferService.findAll(query);
 
@@ -35,6 +36,7 @@ export class TransferController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
   @UseGuards(AuthGuard)
   @Serialize(TransferDto)
   findOne(@Param('id') id: string) {

@@ -10,7 +10,7 @@ import { CardDto } from './dto/card.dto';
 import { Paginate, type PaginateQuery } from 'nestjs-paginate';
 import { plainToInstance } from 'class-transformer';
 
-@Controller('card')
+@Controller('cards')
 export class CardController {
   constructor(private readonly cardService: CardService) {}
 
@@ -22,6 +22,7 @@ export class CardController {
   }
 
   @Get()
+  @UseGuards(AuthGuard)
   async findAll(@Paginate() query:PaginateQuery) {
     const result = await this.cardService.findAll(query);
     return {
@@ -33,6 +34,7 @@ export class CardController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
   @Serialize(CardDto)
   findOne(@Param('id') id: string) {
     return this.cardService.findOne(+id);

@@ -1,13 +1,17 @@
 # Banking System Phase Notes
 
-This document captures the current agreed project direction for the `User` and `Account` modules.
+This document captures the current agreed project direction for the phase-1 backend.
 It is focused on architecture, domain rules, and phase boundaries.
 It intentionally does not include test planning.
 
 ## Scope Covered
 
-- User module: current phase-1 state and deferred phase-2 work
-- Account module: current phase-1 state and deferred phase-2 work
+- User module
+- Account module
+- Transaction module
+- Transfer module
+- Card module
+- Fixed Deposit module
 - Authentication/session behavior relevant to these modules
 
 ## Current Stack and Conventions
@@ -87,6 +91,17 @@ It intentionally does not include test planning.
 ### Current User Decorator
 
 - `@CurrentUser()` reads `req.currentUser` in controllers.
+
+## Phase 1 Summary
+
+The following modules now have a workable phase-1 base:
+
+- `User`
+- `Account`
+- `Transaction`
+- `Transfer`
+- `Card`
+- `FixedDeposit`
 
 ## User Module
 
@@ -234,6 +249,260 @@ Agreed phase-2 chain reaction direction for an `INACTIVE` user:
 - Closing an account means setting `status = CLOSED`.
 - Closing an already closed account should be rejected.
 
+## Transaction Module
+
+## Phase 1: Current Agreed State
+
+### Transaction Domain Direction
+
+- Transaction is treated as a ledger-style money movement record.
+- Phase-1 transaction types are intentionally simple:
+  - `DEPOSIT`
+  - `WITHDRAWAL`
+- These represent money direction, not business purpose.
+
+### Phase-1 Meaning
+
+- Direct deposit creates a `DEPOSIT` transaction.
+- Direct withdrawal creates a `WITHDRAWAL` transaction.
+- Transfer sender-side transaction is recorded as `WITHDRAWAL`.
+- Transfer receiver-side transaction is recorded as `DEPOSIT`.
+- Fixed deposit funding is recorded as `WITHDRAWAL`.
+
+### Transaction Creation Rules
+
+- Only the signed-in user can create a direct transaction on their own account.
+- The client sends only:
+  - `accountId`
+  - `transactionType`
+  - `amount`
+- The server owns:
+  - `status`
+  - account balance update
+  - any transfer linkage
+
+### Transaction Validation Rules
+
+- Account must exist.
+- Account must belong to the signed-in user for direct transactions.
+- Account must not be `CLOSED`.
+- Account must not be `PAUSED`.
+- Amount must be positive.
+- Withdrawal must fail if balance is insufficient.
+
+### Transaction Execution Rules
+
+- Deposit increases account balance.
+- Withdrawal decreases account balance.
+- On successful completion, transaction status becomes `SUCCESS`.
+
+### Transaction Atomicity
+
+- Direct transaction create flow now runs inside a database transaction.
+- Account balance update and transaction insert are committed together.
+
+### Transaction Read Rules
+
+- Single transaction read exists.
+- Transaction list exists with pagination.
+- Current DTO shape exposes a flat response including `accountId`.
+
+### Transaction Mutability Rule
+
+- Generic update is disabled.
+- Generic delete is disabled.
+- Transaction is being treated as immutable history in phase 1.
+
+## Phase 2: Deferred Transaction Work
+
+- Revisit ownership rules on transaction read endpoints where needed.
+- Improve transaction messages and consistency.
+- Consider internal/shared transaction-creation helpers to reduce repeated ledger logic.
+- Add richer transaction purpose categorization if needed later without losing the debit/credit model.
+
+## Transfer Module
+
+## Phase 1: Current Agreed State
+
+### Transfer Domain Direction
+
+- Transfer is a higher-level movement between two accounts.
+- Transfer is not the same as transaction.
+- Transfer creates related transaction records internally.
+
+### Transfer Creation Rules
+
+- Only the signed-in user can initiate a transfer from their own source account.
+- The client sends only:
+  - `fromAccountId`
+  - `toAccountId`
+  - `amount`
+
+### Transfer Validation Rules
+
+- Source account must exist.
+- Destination account must exist.
+- Signed-in user must own the source account.
+- Source and destination account cannot be the same.
+- Neither account may be `CLOSED`.
+- Neither account may be `PAUSED`.
+- Source account must have sufficient balance.
+
+### Transfer Execution Rules
+
+- Source account balance decreases.
+- Destination account balance increases.
+- Transfer is saved with `status = SUCCESS` in the current phase-1 flow.
+- Two related transaction records are created:
+  - source side `WITHDRAWAL`
+  - destination side `DEPOSIT`
+
+### Transfer Atomicity
+
+- Transfer create flow runs inside a database transaction.
+- Balance updates, transfer insert, and transaction inserts are committed together.
+
+### Transfer Read Rules
+
+- Single transfer read exists.
+- Transfer list exists with pagination.
+- Response DTO is flat and exposes:
+  - `fromAccountId`
+  - `toAccountId`
+
+### Transfer Mutability Rule
+
+- Generic update is disabled.
+- Generic delete is disabled.
+- Transfer is being treated as immutable history in phase 1.
+
+## Phase 2: Deferred Transfer Work
+
+- Add clearer ownership rules on transfer reads if needed.
+- Consider transfer-specific business types later if the project needs them.
+- Consider pending/processing transfer workflows if asynchronous behavior is introduced later.
+- Improve consistency of validation/error messaging.
+
+## Card Module
+
+## Phase 1: Current Agreed State
+
+### Card Creation Rules
+
+- Only the signed-in user can create a card on their own account.
+- The client sends:
+  - `accountId`
+  - `cardType`
+  - optional `pin`
+- The server owns:
+  - `cardNumber`
+  - `cvv`
+  - `expiryDate`
+  - `status = ACTIVE`
+
+### Card Validation Rules
+
+- Account must exist.
+- Signed-in user must own the account.
+- Account must not be `CLOSED`.
+- Account must not be `PAUSED`.
+- PIN is optional in phase 1.
+- If provided, PIN must be exactly 4 characters.
+- PIN is treated as digits-only input conceptually and is stored hashed.
+
+### Card Response Rule
+
+- `cvv` is not exposed in API responses.
+- `pin` is not exposed in API responses.
+- Card response DTO stays flat and includes `accountId`.
+
+### Card Read Rules
+
+- Single card read exists.
+- Card list exists with pagination.
+
+### Card Update Rules
+
+- Generic update route is kept, but the allowed fields are narrow.
+- Supported phase-1 update fields:
+  - `status`
+  - `currentPin`
+  - `newPin`
+- PIN change requires both current and new PIN.
+- New PIN is hashed before save.
+
+### Card Remove Rule
+
+- Card remove is status-based, not physical delete.
+- Remove means setting `status = BLOCKED`.
+- Already blocked or expired cards should not be blocked again.
+
+## Phase 2: Deferred Card Work
+
+- Decide whether card reads should be owner-guarded more strictly.
+- Revisit CVV storage strategy if the project later needs stronger realism.
+- Decide how card expiry should be processed.
+- Add dedicated card block/unblock workflows if needed instead of relying only on generic update.
+
+## Fixed Deposit Module
+
+## Phase 1: Current Agreed State
+
+### Fixed Deposit Creation Rules
+
+- Only the signed-in user can create a fixed deposit on their own account.
+- The client sends:
+  - `accountId`
+  - `principalAmount`
+  - `tenure`
+- The server owns:
+  - `interestRate`
+  - `status = ACTIVE`
+  - `maturityDate`
+
+### Fixed Deposit Validation Rules
+
+- Account must exist.
+- Signed-in user must own the account.
+- Account must not be `CLOSED`.
+- Account must not be `PAUSED`.
+- Account must have sufficient balance.
+
+### Fixed Deposit Execution Rules
+
+- FD creation reduces account balance by `principalAmount`.
+- FD creation also creates a related `WITHDRAWAL` transaction record.
+- Maturity date is calculated from the current date and tenure.
+- Current phase-1 implementation uses a fixed interest rate value in service logic.
+
+### Fixed Deposit Atomicity
+
+- Fixed deposit create flow runs inside a database transaction.
+- Account balance update, FD insert, and transaction insert are committed together.
+
+### Fixed Deposit Read Rules
+
+- Single fixed deposit read exists.
+- Fixed deposit list exists with pagination.
+- Response DTO stays flat and includes `accountId`.
+
+### Fixed Deposit Mutability Rule
+
+- Generic update is disabled in phase 1.
+
+### Fixed Deposit Remove Rule
+
+- Remove is status-based, not physical delete.
+- Remove means setting `status = CLOSED`.
+- Already closed fixed deposits should be rejected.
+
+## Phase 2: Deferred Fixed Deposit Work
+
+- Decide whether maturity should be a background/process-driven transition.
+- Add maturity payout behavior when the project is ready for it.
+- Revisit interest-rate strategy so it is not hardcoded.
+- Define whether closing an FD early should create a compensating deposit or penalty workflow.
+
 ## Known Phase-1 Limitation
 
 - Because account creation currently accepts `userId` from the request body, a signed-in user can create an account for another user.
@@ -289,18 +558,42 @@ This same principle should apply one level above as well:
 - account closure should be one part of that workflow
 - related entity updates should happen through the chain reaction in a predictable order
 
+## Phase 2 Checklist
+
+The major phase-2 work that still remains:
+
+- Add stronger authorization rules across modules.
+- Revisit account creation so arbitrary signed-in users cannot create accounts for other users.
+- Make read-access rules consistent across sensitive modules.
+- Decide whether routes should move from singular to plural naming.
+- Improve message consistency and cleanup typos across services.
+- Remove unused imports and other scaffold leftovers from commented-out routes.
+- Revisit account-number generation for concurrency safety.
+- Revisit card-number generation for concurrency safety.
+- Add stronger transaction purpose modeling if the project later needs richer business categories.
+- Add more explicit internal shared helpers for transaction creation where modules overlap.
+- Design account-close side effects as a coordinated workflow:
+  - close related cards
+  - close related fixed deposits
+  - fail pending transactions where applicable
+  - fail pending transfers where applicable
+- Design user-deactivation side effects as a coordinated workflow:
+  - user becomes `INACTIVE`
+  - owned accounts become `CLOSED`
+  - account-close side effects then run
+- Revisit transfer and fixed deposit maturity/processing workflows if async handling is added later.
+- Revisit whether card/FD/transfer reads should be more strictly owner-scoped.
+- Add any postponed hardening and cleanup that was intentionally deferred in phase 1.
+
 ## Current Recommended Boundary
 
-At this point, phase 1 for `User` and `Account` is in a workable state.
-
-The next architecture work should focus on:
-
-- designing related-module behavior around account closure
-- or beginning the next module with similarly narrow phase-1 rules
+At this point, phase 1 for the core modules is in a workable state.
 
 The key principle going forward is:
 
 - keep phase 1 small and explicit
 - keep server-owned fields under service control
 - avoid physical deletes
+- prefer status-based lifecycle changes
 - avoid broad nested responses by default
+- use database transactions for money-moving multi-write flows

@@ -22,6 +22,7 @@ export class FixedDepositController {
   }
 
   @Get()
+  @UseGuards(AuthGuard)
   async findAll(@Paginate() query:PaginateQuery) {
     const result = await this.fixedDepositService.findAll(query);
     return{
@@ -33,6 +34,7 @@ export class FixedDepositController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
   @Serialize(FixedDepositDto)
   findOne(@Param('id') id: string) {
     return this.fixedDepositService.findOne(+id);
@@ -44,9 +46,9 @@ export class FixedDepositController {
   //   return this.fixedDepositService.update(+id, updateFixedDepositDto);
   // }
 
-  // @Delete(':id')
-  // @Serialize(FixedDepositDto)
-  // remove(@Param('id') id: string) {
-  //   return this.fixedDepositService.remove(+id);
-  // }
+  @Delete(':id')
+  @Serialize(FixedDepositDto)
+  remove(@Param('id') id: string) {
+    return this.fixedDepositService.remove(+id);
+  }
 }

@@ -12,7 +12,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 
 @ApiTags('Accounts')
-@Controller('account')
+@Controller('accounts')
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 

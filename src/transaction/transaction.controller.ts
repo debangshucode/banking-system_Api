@@ -11,7 +11,7 @@ import { Paginate } from 'nestjs-paginate';
 import type { PaginateQuery } from 'nestjs-paginate'
 import { plainToInstance } from 'class-transformer';
 
-@Controller('transaction')
+@Controller('transactions')
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 

@@ -49,7 +49,7 @@ export class TransferService {
     try {
       const account = await queryRunner.manager.findOne(Account, { where: { id: createTransferDto.fromAccountId }, relations: { user: true } });
       if (!account) throw new NotFoundException('Source Account not found');
-      if (account.user.id !== user.id) throw new BadRequestException('You dont have access to this account')
+      if (account.user.id !== user.id) throw new BadRequestException(`You don't have access to this account`)
 
       const toAccount = await queryRunner.manager.findOne(Account, { where: { id: createTransferDto.toAccountId }, relations: { user: true } });
       if (!toAccount) throw new NotFoundException('Destination Account not Found');
@@ -57,12 +57,12 @@ export class TransferService {
       if (account.id === toAccount.id) throw new BadRequestException('Source And Destination Accounts can not be same');
 
       if (account.status === AccountStatus.CLOSED || account.status === AccountStatus.PAUSED) throw new BadRequestException(`Your account is ${account.status}`);
-      if (toAccount.status === AccountStatus.CLOSED || toAccount.status === AccountStatus.PAUSED) throw new BadRequestException(`Reciver account is ${toAccount.status}`);
+      if (toAccount.status === AccountStatus.CLOSED || toAccount.status === AccountStatus.PAUSED) throw new BadRequestException(`Receiveraccount is ${toAccount.status}`);
 
       let senderBalance = Number(account.balance)
-      let reciverBalance = Number(toAccount.balance);
+      let receiverBalance= Number(toAccount.balance);
 
-      if (senderBalance < createTransferDto.amount) throw new BadRequestException('Inufficient Account Balance')
+      if (senderBalance < createTransferDto.amount) throw new BadRequestException('InsufficientAccount Balance')
 
       const transfer = queryRunner.manager.create(Transfer, {
         amount: createTransferDto.amount,
@@ -72,10 +72,10 @@ export class TransferService {
       });
 
       senderBalance -= createTransferDto.amount;
-      reciverBalance += createTransferDto.amount;
+      receiverBalance+= createTransferDto.amount;
 
       account.balance = senderBalance;
-      toAccount.balance = reciverBalance;
+      toAccount.balance = receiverBalance;
 
       await queryRunner.manager.save(account);
       await queryRunner.manager.save(toAccount);
