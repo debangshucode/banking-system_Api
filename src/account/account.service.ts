@@ -2,13 +2,18 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account, AccountStatus, AccountType } from './entities/account.entity';
-import { Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { User, UserRole, UserStatus } from 'src/users/entities/user.entity';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
+import { FixedDepositService } from 'src/fixed-deposit/fixed-deposit.service';
+import { CardService } from 'src/card/card.service';
+import { QueryRunner } from 'typeorm/browser';
+import { Card, CardStatus } from 'src/card/entities/card.entity';
+import { FdStatus, FixedDeposit } from 'src/fixed-deposit/entities/fixed-deposit.entity';
 
 @Injectable()
 export class AccountService {
-  constructor(@InjectRepository(Account) private accountRepo: Repository<Account>, @InjectRepository(User) private userReop: Repository<User>) { }
+  constructor(@InjectRepository(Account) private accountRepo: Repository<Account>, @InjectRepository(User) private userReop: Repository<User>, private fdService: FixedDepositService, private cardService: CardService) { }
 
   // ** generate account number helper function
   private async generateAccountNumber() {
@@ -24,11 +29,11 @@ export class AccountService {
   }
 
   // * --create account service
-  async create(user:User,type: AccountType, userId: number) {
+  async create(user: User, type: AccountType, userId: number) {
     const createUser = await this.userReop.findOne({ where: { id: userId } })
     if (!createUser) throw new NotFoundException('user not found');
 
-    if(user.role !== UserRole.ADMIN && user.id !== createUser.id) throw new BadRequestException(`You don't have access to create account for another user`)
+    if (user.role !== UserRole.ADMIN && user.id !== createUser.id) throw new BadRequestException(`You don't have access to create account for another user`)
     if (createUser.status === UserStatus.INACTIVE) throw new BadRequestException('User is InActive');
 
     const accountNumber = await this.generateAccountNumber()
@@ -41,11 +46,11 @@ export class AccountService {
   }
 
   // * --find All account service
-  findAll(query:PaginateQuery) {
-    return paginate (query,this.accountRepo,{
-      relations:['user'],
-      sortableColumns:['id'],
-      defaultSortBy:[['id','DESC']]
+  findAll(query: PaginateQuery) {
+    return paginate(query, this.accountRepo, {
+      relations: ['user'],
+      sortableColumns: ['id'],
+      defaultSortBy: [['id', 'DESC']]
     })
   }
 
@@ -55,25 +60,64 @@ export class AccountService {
       where: { id },
       relations: { user: true },
     })
-    if(!account) throw new NotFoundException('Account not found')
+    if (!account) throw new NotFoundException('Account not found')
     return account;
   }
 
   // * --update account service
-  async update(currentUser:User,id: number, updateAccountDto: UpdateAccountDto) {
-    const account = await this.accountRepo.findOne({where:{id},relations:{user:true}});
-    if(!account) throw new NotFoundException('Account not found');
-    if(currentUser.role!== UserRole.ADMIN && currentUser.id !== account.user.id) throw new BadRequestException(`You don't have permission to update this account`)
-    Object.assign(account,updateAccountDto);
+  async update(currentUser: User, id: number, updateAccountDto: UpdateAccountDto) {
+    const account = await this.accountRepo.findOne({ where: { id }, relations: { user: true } });
+    if (!account) throw new NotFoundException('Account not found');
+    if (currentUser.role !== UserRole.ADMIN && currentUser.id !== account.user.id) throw new BadRequestException(`You don't have permission to update this account`)
+    Object.assign(account, updateAccountDto);
     return this.accountRepo.save(account)
   }
 
   // * --deactivate account service
   async close(id: number) {
-    const account = await this.accountRepo.findOne({where:{id},relations:{user:true}});
-    if(!account) throw new NotFoundException('Account not found')
-    if(account.status === AccountStatus.CLOSED) throw new BadRequestException('Account is Already closed')
+    const account = await this.accountRepo.findOne({ where: { id }, relations: { user: true } });
+    if (!account) throw new NotFoundException('Account not found')
+    if (account.status === AccountStatus.CLOSED) throw new BadRequestException('Account is Already closed')
     account.status = AccountStatus.CLOSED;
     return this.accountRepo.save(account);
   }
+
+  // ! -- close all accouts of a user - user service 
+
+  async closeByUser(userId: number, queryRunner: QueryRunner) {
+
+
+    await queryRunner.manager.update(
+      Card, {
+      account: { user: { id: userId } },
+      status: Not(CardStatus.BLOCKED)
+    },
+      {
+        status: CardStatus.BLOCKED
+      }
+    )
+
+    await queryRunner.manager.update(
+      FixedDeposit, {
+      account: { user: { id: userId } },
+      status: Not(FdStatus.CLOSED),
+    }, {
+      status: FdStatus.CLOSED,
+    }
+    )
+
+    const result = await queryRunner.manager.update(
+      Account, {
+      user: { id: userId },
+      status: Not(AccountStatus.CLOSED)
+    },
+      {
+        status: AccountStatus.CLOSED
+      }
+    )
+
+    return result.affected;
+
+  }
+
 }

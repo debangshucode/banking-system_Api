@@ -7,6 +7,8 @@ import { Repository } from 'typeorm';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
+import { AccountService } from 'src/account/account.service';
+import { DataSource } from 'typeorm/browser';
 
 
 const scrypt = promisify(_scrypt)
@@ -30,7 +32,7 @@ async function hashPassword(password: string) {
 @Injectable()
 export class UsersService {
 
-  constructor(@InjectRepository(User) private repo: Repository<User>) { }
+  constructor(@InjectRepository(User) private repo: Repository<User>, private accountService: AccountService, private dataSource: DataSource) { }
 
   //* --create user
   async create(createUserDto: CreateUserDto) {
@@ -104,9 +106,33 @@ export class UsersService {
 
   // * -- remove users 
   async deactivate(id: number) {
-    const user = await this.repo.findOne({ where: { id } });
-    if (!user) throw new NotFoundException('User Not Found');
-    user.status = UserStatus.INACTIVE;
-    return this.repo.save(user)
+
+
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+
+    try {
+      const user = await queryRunner.manager.findOne(User, {
+        where: { id },
+      });
+
+      if (!user) throw new NotFoundException(`User not found`);
+
+      user.status = UserStatus.INACTIVE;
+      await queryRunner.manager.save(user);
+
+      await this.accountService.closeByUser(user.id, queryRunner);
+
+      await queryRunner.commitTransaction()
+      return user;
+    }
+    catch (err) {
+      await queryRunner.rollbackTransaction()
+      throw err;
+    }
+    finally {
+      await queryRunner.release();
+    }
   }
 }

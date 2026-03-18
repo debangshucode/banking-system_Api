@@ -9,5 +9,6 @@ import { Account } from 'src/account/entities/account.entity';
   imports:[TypeOrmModule.forFeature([FixedDeposit,Account])],
   controllers: [FixedDepositController],
   providers: [FixedDepositService],
+  exports:[FixedDepositService]
 })
 export class FixedDepositModule {}
