@@ -1,100 +1,301 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Banking System API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: [banking-systemapi-production.up.railway.app](https://banking-systemapi-production.up.railway.app/api#/)
+Backend API for a banking system built with NestJS, TypeORM, PostgreSQL, Swagger, and cookie-session authentication.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-  
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Live API Docs
 
-## Description
+Hosted Swagger UI:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-[API_DOCUMENTATION_SWAGGER](https://banking-systemapi-production.up.railway.app/api#/)
+[https://banking-systemapi-production.up.railway.app/api#/](https://banking-systemapi-production.up.railway.app/api#/)
 
-## Project setup
+Use the hosted Swagger page to explore routes, request bodies, and response schemas.
 
-```bash
-$ npm install
+## What This API Covers
+
+This API includes the main banking features below:
+
+- User signup, signin, signout, profile lookup, update, password change, and user deactivation
+- Account creation, listing, lookup, update, and account closing
+- Deposit and withdrawal style transactions
+- Account-to-account transfers
+- Card creation, listing, lookup, update, and blocking/removal
+- Fixed deposit creation, listing, lookup, and closing
+
+## Tech Stack
+
+- NestJS
+- TypeORM
+- PostgreSQL
+- Swagger
+- cookie-session
+- class-validator
+- nestjs-paginate
+
+## Base URLs
+
+Local development:
+
+```text
+http://localhost:3000
 ```
 
-## Compile and run the project
+Local Swagger:
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```text
+http://localhost:3000/api
 ```
 
-## Run tests
+Hosted Swagger:
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```text
+https://banking-systemapi-production.up.railway.app/api#/
 ```
 
-## Deployment
+## Authentication
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+This project uses session-based authentication with `cookie-session`.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Important behavior:
+
+- After `signup` or `signin`, the server stores `userId` in the session
+- Protected routes require that session cookie
+- In Swagger or Postman, requests must be sent using the same session/cookie context after login
+- Admin-only routes are protected with `AdminGuard`
+
+## Getting Started
+
+Install dependencies:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Run the project in development watch mode:
 
-## Resources
+```bash
+npm run start:dev
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+Build the project:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+npm run build
+```
 
-## Support
+Run compiled production build:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npm run start:prod
+```
 
-## Stay in touch
+## Environment Notes
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+The app reads database and session configuration from environment variables. Make sure your local `.env` is configured before starting the server.
 
-## License
+Common values used by the app:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- `PORT`
+- `COOKIE_KEY`
+- `DATABASE_URL`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `DB_NAME`
+- `NODE_ENV`
+
+## Main Modules
+
+### Users
+
+Handles:
+
+- Signup
+- Signin
+- Signout
+- Get current logged-in user
+- Get user by id
+- Update user
+- Change password
+- Deactivate user
+
+Main routes:
+
+- `POST /users/signup`
+- `POST /users/signin`
+- `POST /users/signout`
+- `GET /users/curUser`
+- `GET /users/all-users`
+- `GET /users/:id`
+- `PATCH /users/change-password`
+- `PATCH /users/:id`
+- `DELETE /users/:id`
+
+### Accounts
+
+Handles:
+
+- Create bank account
+- List accounts
+- Get account by id
+- Update account
+- Close account
+
+Main routes:
+
+- `POST /accounts`
+- `GET /accounts`
+- `GET /accounts/:id`
+- `PATCH /accounts/:id`
+- `DELETE /accounts/:id`
+
+### Transactions
+
+Handles:
+
+- Create transactions
+- View all transactions
+- View transaction by id
+
+Main routes:
+
+- `POST /transactions`
+- `GET /transactions`
+- `GET /transactions/:id`
+
+### Transfers
+
+Handles:
+
+- Create transfer between accounts
+- View all transfers
+- View transfer by id
+
+Main routes:
+
+- `POST /transfers`
+- `GET /transfers`
+- `GET /transfers/:id`
+
+### Cards
+
+Handles:
+
+- Create card for account
+- List cards
+- Get card by id
+- Update card
+- Remove or block card
+
+Main routes:
+
+- `POST /cards`
+- `GET /cards`
+- `GET /cards/:id`
+- `PATCH /cards/:id`
+- `DELETE /cards/:id`
+
+### Fixed Deposits
+
+Handles:
+
+- Create fixed deposit
+- List fixed deposits
+- Get fixed deposit by id
+- Close fixed deposit
+
+Main routes:
+
+- `POST /fixed-deposit`
+- `GET /fixed-deposit`
+- `GET /fixed-deposit/:id`
+- `DELETE /fixed-deposit/:id`
+
+## Authorization Overview
+
+General access pattern in this project:
+
+- Authenticated users can access their own protected actions
+- Admin users can access admin-only listing and management routes
+- Routes such as `GET all` are commonly admin-only
+- Session auth must be active before calling protected endpoints
+
+Always verify behavior in Swagger with the same logged-in session.
+
+## Pagination
+
+Several listing routes use `nestjs-paginate`.
+
+Examples:
+
+- `GET /users/all-users`
+- `GET /accounts`
+- `GET /transactions`
+- `GET /transfers`
+- `GET /cards`
+- `GET /fixed-deposit`
+
+Check Swagger for supported query parameters such as page, limit, sorting, and filtering behavior.
+
+## Typical API Flow
+
+Basic user flow:
+
+1. `POST /users/signup` or `POST /users/signin`
+2. Keep the session cookie
+3. Call protected routes like `/users/curUser`, `/accounts`, `/transactions`, or `/transfers`
+
+Admin flow:
+
+1. Sign in with an admin account
+2. Use admin-only listing and deactivation routes
+3. Verify results using resource lookup endpoints
+
+## Response Notes
+
+- Some successful actions may return `204 No Content`
+- Example: deleting or deactivating a resource can succeed without returning a JSON body
+- For those cases, verify success using the HTTP status code and a follow-up `GET`
+
+## Testing
+
+Run unit tests:
+
+```bash
+npm run test
+```
+
+Run e2e tests:
+
+```bash
+npm run test:e2e
+```
+
+Run coverage:
+
+```bash
+npm run test:cov
+```
+
+## Project Scripts
+
+- `npm run start`
+- `npm run start:dev`
+- `npm run start:debug`
+- `npm run start:prod`
+- `npm run build`
+- `npm run lint`
+- `npm run test`
+- `npm run test:e2e`
+- `npm run test:cov`
+
+## Recommended Way To Explore The API
+
+1. Open the hosted Swagger UI
+2. Sign in or sign up first
+3. Reuse the same session while testing protected endpoints
+4. Use admin credentials for admin-only routes
+
+Hosted Swagger UI:
+
+[https://banking-systemapi-production.up.railway.app/api#/](https://banking-systemapi-production.up.railway.app/api#/)
