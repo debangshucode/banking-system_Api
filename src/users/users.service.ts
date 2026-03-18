@@ -3,12 +3,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, UserRole, UserStatus } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { Repository,DataSource } from 'typeorm';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
 import { AccountService } from 'src/account/account.service';
-import { DataSource } from 'typeorm/browser';
 
 
 const scrypt = promisify(_scrypt)

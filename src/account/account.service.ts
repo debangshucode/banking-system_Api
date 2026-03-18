@@ -2,12 +2,11 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account, AccountStatus, AccountType } from './entities/account.entity';
-import { In, Not, Repository } from 'typeorm';
+import { In, Not, Repository,QueryRunner } from 'typeorm';
 import { User, UserRole, UserStatus } from 'src/users/entities/user.entity';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
 import { FixedDepositService } from 'src/fixed-deposit/fixed-deposit.service';
 import { CardService } from 'src/card/card.service';
-import { QueryRunner } from 'typeorm/browser';
 import { Card, CardStatus } from 'src/card/entities/card.entity';
 import { FdStatus, FixedDeposit } from 'src/fixed-deposit/entities/fixed-deposit.entity';
 
@@ -85,26 +84,29 @@ export class AccountService {
   // ! -- close all accouts of a user - user service 
 
   async closeByUser(userId: number, queryRunner: QueryRunner) {
+    const accounts = await queryRunner.manager.find(Account, {
+      where: { user: { id: userId } },
+      select: ['id'],
+    });
+    const accountIds = accounts.map((account) => account.id);
 
+    if (accountIds.length > 0) {
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(Card)
+        .set({ status: CardStatus.BLOCKED })
+        .where('"accountId" IN (:...accountIds)', { accountIds })
+        .andWhere('status != :blockedStatus', { blockedStatus: CardStatus.BLOCKED })
+        .execute();
 
-    await queryRunner.manager.update(
-      Card, {
-      account: { user: { id: userId } },
-      status: Not(CardStatus.BLOCKED)
-    },
-      {
-        status: CardStatus.BLOCKED
-      }
-    )
-
-    await queryRunner.manager.update(
-      FixedDeposit, {
-      account: { user: { id: userId } },
-      status: Not(FdStatus.CLOSED),
-    }, {
-      status: FdStatus.CLOSED,
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(FixedDeposit)
+        .set({ status: FdStatus.CLOSED })
+        .where('"accountId" IN (:...accountIds)', { accountIds })
+        .andWhere('status != :closedStatus', { closedStatus: FdStatus.CLOSED })
+        .execute();
     }
-    )
 
     const result = await queryRunner.manager.update(
       Account, {
