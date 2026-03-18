@@ -42,10 +42,10 @@ export class CardController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard)
   @Serialize(CardDto)
-  update(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto) {
-    return this.cardService.update(+id, updateCardDto);
+  update(@CurrentUser() user:User,@Param('id') id: string, @Body() updateCardDto: UpdateCardDto) {
+    return this.cardService.update(user,+id, updateCardDto);
   }
 
   @Delete(':id')

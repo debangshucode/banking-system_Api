@@ -60,10 +60,10 @@ export class AccountService {
   }
 
   // * --update account service
-  async update(id: number, updateAccountDto: UpdateAccountDto) {
+  async update(currentUser:User,id: number, updateAccountDto: UpdateAccountDto) {
     const account = await this.accountRepo.findOne({where:{id},relations:{user:true}});
     if(!account) throw new NotFoundException('Account not found');
-    
+    if(currentUser.role!== UserRole.ADMIN && currentUser.id !== account.user.id) throw new BadRequestException(`You don't have permission to update this account`)
     Object.assign(account,updateAccountDto);
     return this.accountRepo.save(account)
   }

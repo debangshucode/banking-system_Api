@@ -50,10 +50,10 @@ export class AccountController {
 
   //* --update account
   @Patch(':id')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards( AuthGuard)
   @Serialize(AccountDto)
-  update(@Param('id') id: string, @Body() updateAccountDto: UpdateAccountDto) {
-    return this.accountService.update(+id, updateAccountDto);
+  update(@CurrentUser() user:User,@Param('id') id: string, @Body() updateAccountDto: UpdateAccountDto) {
+    return this.accountService.update(user,+id, updateAccountDto);
   }
 
   //* --deactivate account
