@@ -10,6 +10,8 @@ import type {PaginateQuery} from 'nestjs-paginate'
 import { plainToInstance } from 'class-transformer';
 import { ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from 'src/guards/admin.guard';
+import { CurrentUser } from 'src/users/decorators/current-user.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 
 @ApiTags('Accounts')
@@ -21,8 +23,8 @@ export class AccountController {
   @Post()
   @Serialize(AccountDto)
   @UseGuards(AuthGuard)
-  create(@Body() createAccountDto: CreateAccountDto) {
-    return this.accountService.create(createAccountDto.accountType,createAccountDto.userId);
+  create(@CurrentUser() user:User,@Body() createAccountDto: CreateAccountDto) {
+    return this.accountService.create(user,createAccountDto.accountType,createAccountDto.userId);
   }
 
   //* --get all account

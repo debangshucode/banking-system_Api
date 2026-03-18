@@ -4,7 +4,7 @@ import { UpdateCardDto } from './dto/update-card.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account, AccountStatus } from 'src/account/entities/account.entity';
 import { Card, CardStatus } from './entities/card.entity';
-import { User } from 'src/users/entities/user.entity';
+import { User, UserRole } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { promisify } from 'util';
 import { randomBytes, scrypt as _scrypt, randomInt } from 'crypto';
@@ -46,7 +46,7 @@ export class CardService {
   async create(user: User, createCardDto: CreateCardDto) {
     const account = await this.accountRepo.findOne({ where: { id: createCardDto.accountId }, relations: { user: true } })
     if (!account) throw new NotFoundException('Account does not exist');
-    if (account.user.id !== user.id) throw new BadRequestException('You are not authorized to access this account');
+    if (user.role !== UserRole.ADMIN && account.user.id !== user.id) throw new BadRequestException('You are not authorized to access this account');
     if (account.status === AccountStatus.CLOSED || account.status === AccountStatus.PAUSED) throw new BadRequestException(`This account is ${account.status}`);
 
     const card = this.cardRepo.create();

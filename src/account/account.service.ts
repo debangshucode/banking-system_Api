@@ -3,7 +3,7 @@ import { UpdateAccountDto } from './dto/update-account.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account, AccountStatus, AccountType } from './entities/account.entity';
 import { Repository } from 'typeorm';
-import { User, UserStatus } from 'src/users/entities/user.entity';
+import { User, UserRole, UserStatus } from 'src/users/entities/user.entity';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
@@ -24,16 +24,18 @@ export class AccountService {
   }
 
   // * --create account service
-  async create(type: AccountType, userId: number) {
-    const user = await this.userReop.findOne({ where: { id: userId } })
-    if (!user) throw new NotFoundException('user not found');
-    if (user.status === UserStatus.INACTIVE) throw new BadRequestException('User is InActive');
+  async create(user:User,type: AccountType, userId: number) {
+    const createUser = await this.userReop.findOne({ where: { id: userId } })
+    if (!createUser) throw new NotFoundException('user not found');
+
+    if(user.role !== UserRole.ADMIN && user.id !== createUser.id) throw new BadRequestException(`You don't have access to create account for another user`)
+    if (createUser.status === UserStatus.INACTIVE) throw new BadRequestException('User is InActive');
 
     const accountNumber = await this.generateAccountNumber()
 
     const account = this.accountRepo.create();
     account.accountType = type;
-    account.user = user;
+    account.user = createUser;
     account.accountNumber = accountNumber;
     return this.accountRepo.save(account);
   }
