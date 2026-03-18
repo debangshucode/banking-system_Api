@@ -38,15 +38,15 @@ export class FixedDepositController {
     return this.fixedDepositService.findOne(+id);
   }
 
-  @Patch(':id')
-  @Serialize(FixedDepositDto)
-  update(@Param('id') id: string, @Body() updateFixedDepositDto: UpdateFixedDepositDto) {
-    return this.fixedDepositService.update(+id, updateFixedDepositDto);
-  }
+  // @Patch(':id')
+  // @Serialize(FixedDepositDto)
+  // update(@Param('id') id: string, @Body() updateFixedDepositDto: UpdateFixedDepositDto) {
+  //   return this.fixedDepositService.update(+id, updateFixedDepositDto);
+  // }
 
-  @Delete(':id')
-  @Serialize(FixedDepositDto)
-  remove(@Param('id') id: string) {
-    return this.fixedDepositService.remove(+id);
-  }
+  // @Delete(':id')
+  // @Serialize(FixedDepositDto)
+  // remove(@Param('id') id: string) {
+  //   return this.fixedDepositService.remove(+id);
+  // }
 }

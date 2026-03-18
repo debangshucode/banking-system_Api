@@ -82,11 +82,11 @@ export class FixedDepositService {
     return fd;
   }
 
-  update(id: number, updateFixedDepositDto: UpdateFixedDepositDto) {
-    return `This action updates a #${id} fixedDeposit`;
-  }
+//   update(id: number, updateFixedDepositDto: UpdateFixedDepositDto) {
+//     return `This action updates a #${id} fixedDeposit`;
+//   }
 
-  remove(id: number) {
-    return `This action removes a #${id} fixedDeposit`;
-  }
+//   remove(id: number) {
+//     return `This action removes a #${id} fixedDeposit`;
+//   }
 }
