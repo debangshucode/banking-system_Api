@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account, AccountStatus, AccountType } from './entities/account.entity';
@@ -32,7 +32,7 @@ export class AccountService {
     const createUser = await this.userReop.findOne({ where: { id: userId } })
     if (!createUser) throw new NotFoundException('user not found');
 
-    if (user.role !== UserRole.ADMIN && user.id !== createUser.id) throw new BadRequestException(`You don't have access to create account for another user`)
+    if (user.role !== UserRole.ADMIN && user.id !== createUser.id) throw new ForbiddenException(`You don't have access to create account for another user`)
     if (createUser.status === UserStatus.INACTIVE) throw new BadRequestException('User is InActive');
 
     const accountNumber = await this.generateAccountNumber()

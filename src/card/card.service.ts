@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -46,7 +46,7 @@ export class CardService {
   async create(user: User, createCardDto: CreateCardDto) {
     const account = await this.accountRepo.findOne({ where: { id: createCardDto.accountId }, relations: { user: true } })
     if (!account) throw new NotFoundException('Account does not exist');
-    if (user.role !== UserRole.ADMIN && account.user.id !== user.id) throw new BadRequestException('You are not authorized to access this account');
+    if (user.role !== UserRole.ADMIN && account.user.id !== user.id) throw new ForbiddenException('You are not authorized to access this account');
     if (account.status === AccountStatus.CLOSED || account.status === AccountStatus.PAUSED) throw new BadRequestException(`This account is ${account.status}`);
 
     const card = this.cardRepo.create();

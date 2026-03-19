@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -62,7 +62,7 @@ export class UsersService {
       }
     })
 
-    if (!user) throw new NotFoundException('user not found ')
+    if (!user) throw new UnauthorizedException('invalid credentials')
     if (user.status === UserStatus.INACTIVE) throw new BadRequestException('User is Deactivated')
 
     await verifyPassword(password, user.password)
@@ -89,7 +89,7 @@ export class UsersService {
   async update(user: User, id: number, updateUserDto: UpdateUserDto) {
     const updateUser = await this.repo.findOne({ where: { id } })
     if (!updateUser) throw new NotFoundException("User not found")
-    if (user.role !== UserRole.ADMIN && user.id !== updateUser.id) throw new BadRequestException(`You don't have the permission to update this user`)
+    if (user.role !== UserRole.ADMIN && user.id !== updateUser.id) throw new ForbiddenException(`You don't have the permission to update this user`)
     Object.assign(updateUser, updateUserDto)
     return this.repo.save(updateUser)
   }
