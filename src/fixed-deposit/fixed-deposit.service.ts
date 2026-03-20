@@ -24,7 +24,7 @@ export class FixedDepositService {
 
     try {
 
-      const account = await queryRunner.manager.findOne(Account, { where: { id: createFixedDepositDto.accountId }, relations: { user: true } })
+      const account = await queryRunner.manager.findOne(Account, { where: { id: createFixedDepositDto.accountId }, relations: { user: true },lock: { mode: 'pessimistic_write' } })
 
       if (!account) throw new NotFoundException('Account does not exist ')
       if (user.role !== UserRole.ADMIN && account.user.id !== user.id) throw new ForbiddenException(' You are not authorized to access this account');

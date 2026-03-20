@@ -40,7 +40,7 @@ export class UsersService {
         email: createUserDto.email
       }
     })
-    if (existingUser) throw new BadRequestException('User with this mail is already registerd ! Try to Sign in')
+    if (existingUser) throw new ConflictException('Email already exists')
 
 
 

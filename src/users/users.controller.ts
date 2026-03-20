@@ -98,7 +98,7 @@ export class UsersController {
   @Delete(':id')
   @UseGuards(AuthGuard,AdminGuard)
   @HttpCode(204)
-  remove(@Param('id') id: string) {
-    return this.usersService.deactivate(+id);
+  async remove(@Param('id') id: string) {
+    await this.usersService.deactivate(+id);
   }
 }

@@ -24,7 +24,7 @@ export class TransactionService {
     try {
 
       const targetAccount = createTransactionDto.accountId;
-      const account = await queryRunner.manager.findOne(Account, { where: { id: targetAccount }, relations: { user: true } })
+      const account = await queryRunner.manager.findOne(Account, { where: { id: targetAccount }, relations: { user: true } ,lock: { mode: 'pessimistic_write' },})
       if (!account) throw new NotFoundException('Account Not Found');
       if (account.user.id !== user.id) throw new ForbiddenException (`You don't have permission to access this account`);
       if (account.status === AccountStatus.CLOSED || account.status === AccountStatus.PAUSED) throw new BadRequestException(`Can not initiate transaction as this Account is ${account.status}`)

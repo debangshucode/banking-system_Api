@@ -47,11 +47,11 @@ export class TransferService {
     await queryRunner.startTransaction();
 
     try {
-      const account = await queryRunner.manager.findOne(Account, { where: { id: createTransferDto.fromAccountId }, relations: { user: true } });
+      const account = await queryRunner.manager.findOne(Account, { where: { id: createTransferDto.fromAccountId }, relations: { user: true },lock: { mode: 'pessimistic_write' } });
       if (!account) throw new NotFoundException('Source Account not found');
       if (account.user.id !== user.id) throw new ForbiddenException(`You don't have access to this account`)
 
-      const toAccount = await queryRunner.manager.findOne(Account, { where: { id: createTransferDto.toAccountId }, relations: { user: true } });
+      const toAccount = await queryRunner.manager.findOne(Account, { where: { id: createTransferDto.toAccountId }, relations: { user: true },lock: { mode: 'pessimistic_write' } });
       if (!toAccount) throw new NotFoundException('Destination Account not Found');
 
       if (account.id === toAccount.id) throw new BadRequestException('Source And Destination Accounts can not be same');
