@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFixedDepositDto } from './dto/create-fixed-deposit.dto';
 import { UpdateFixedDepositDto } from './dto/update-fixed-deposit.dto';
 import { User, UserRole } from 'src/users/entities/user.entity';
@@ -27,7 +27,7 @@ export class FixedDepositService {
       const account = await queryRunner.manager.findOne(Account, { where: { id: createFixedDepositDto.accountId }, relations: { user: true } })
 
       if (!account) throw new NotFoundException('Account does not exist ')
-      if (user.role !== UserRole.ADMIN && account.user.id !== user.id) throw new BadRequestException(' You are not authorized to access this account');
+      if (user.role !== UserRole.ADMIN && account.user.id !== user.id) throw new ForbiddenException(' You are not authorized to access this account');
 
       let balance = Number(account?.balance)
       if (balance < createFixedDepositDto.principalAmount) throw new BadRequestException('Insufficient Account Balance');

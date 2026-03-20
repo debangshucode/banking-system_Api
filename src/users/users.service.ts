@@ -1,9 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, UserRole, UserStatus } from './entities/user.entity';
-import { Repository,DataSource } from 'typeorm';
+import { Repository, DataSource, QueryFailedError } from 'typeorm';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
@@ -50,7 +50,19 @@ export class UsersService {
       password: result,
     })
 
-    return this.repo.save(user);
+    try {
+      return await this.repo.save(user);
+    }
+    catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        (error as any).driverError?.code === '23505'
+      ) {
+        throw new ConflictException('Email already exists');
+      }
+
+      throw error;
+    }
 
   }
 

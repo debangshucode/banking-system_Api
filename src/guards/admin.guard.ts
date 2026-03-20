@@ -9,7 +9,7 @@ export class AdminGuard implements CanActivate{
         if(!request.currentUser) {
             throw new UnauthorizedException('User not authenticated')
         }
-        if (request.currentUser.role === UserRole.ADMIN) {
+        if (request.currentUser.role !== UserRole.ADMIN) {
             throw new ForbiddenException('You dont have access to this resouces')
         }
 

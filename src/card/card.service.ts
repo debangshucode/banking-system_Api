@@ -84,7 +84,7 @@ export class CardService {
   async update(currentUser:User,id: number, updateCardDto: UpdateCardDto) {
     const card = await this.cardRepo.findOne({ where: { id }, relations: { account: {user:true} } })
     if (!card) throw new NotFoundException('Card does not exists');
-    if(currentUser.role !== UserRole.ADMIN && card.account.user.id !== currentUser.id) throw new BadRequestException(`You don't have permission to update this Card`)
+    if(currentUser.role !== UserRole.ADMIN && card.account.user.id !== currentUser.id) throw new ForbiddenException(`You don't have permission to update this Card`)
     card.status = updateCardDto?.status ?? card.status;
 
     if (updateCardDto.currentPin && !updateCardDto.newPin) throw new BadRequestException('Both current PIN and new PIN are required ')

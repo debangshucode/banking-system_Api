@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { User } from 'src/users/entities/user.entity';
@@ -26,7 +26,7 @@ export class TransactionService {
       const targetAccount = createTransactionDto.accountId;
       const account = await queryRunner.manager.findOne(Account, { where: { id: targetAccount }, relations: { user: true } })
       if (!account) throw new NotFoundException('Account Not Found');
-      if (account.user.id !== user.id) throw new BadRequestException(`You don't have permission to access this account`);
+      if (account.user.id !== user.id) throw new ForbiddenException (`You don't have permission to access this account`);
       if (account.status === AccountStatus.CLOSED || account.status === AccountStatus.PAUSED) throw new BadRequestException(`Can not initiate transaction as this Account is ${account.status}`)
 
       const transaction = queryRunner.manager.create(Transaction, {

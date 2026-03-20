@@ -24,7 +24,6 @@ export class AccountController {
   @Serialize(AccountDto)
   @UseGuards(AuthGuard)
   create(@CurrentUser() user:User,@Body() createAccountDto: CreateAccountDto) {
-     console.log('controller create hit', user, createAccountDto);
     return this.accountService.create(user,createAccountDto.accountType,createAccountDto.userId);
   }
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTransferDto } from './dto/create-transfer.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
 import { User } from 'src/users/entities/user.entity';
@@ -49,7 +49,7 @@ export class TransferService {
     try {
       const account = await queryRunner.manager.findOne(Account, { where: { id: createTransferDto.fromAccountId }, relations: { user: true } });
       if (!account) throw new NotFoundException('Source Account not found');
-      if (account.user.id !== user.id) throw new BadRequestException(`You don't have access to this account`)
+      if (account.user.id !== user.id) throw new ForbiddenException(`You don't have access to this account`)
 
       const toAccount = await queryRunner.manager.findOne(Account, { where: { id: createTransferDto.toAccountId }, relations: { user: true } });
       if (!toAccount) throw new NotFoundException('Destination Account not Found');
